@@ -1,0 +1,134 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: BTDevicesManager\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-19 06:39+0200\n"
+"PO-Revision-Date: 2016-05-07 13:09+0200\n"
+"Last-Translator: neoatomic <neoatomic@users.noreply.github.com>\n"
+"Language-Team: openspa <openspa.info>\n"
+"Language: ca_CA\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+
+#, fuzzy
+#: ../setup.xml
+msgid "Audio Connect"
+msgstr "Connectar"
+
+#: ../plugin.py:93 ../plugin.py:406 ../plugin.py:458 ../setup.xml
+msgid "Bluetooth Setup"
+msgstr ""
+
+#: ../plugin.py:458
+msgid "BluetoothSetup"
+msgstr ""
+
+#, fuzzy
+#: ../plugin.py:329 ../plugin.py:344
+msgid "Can not connect with selected device!"
+msgstr "No es pot vincular amb aquest dispositiu!"
+
+#, fuzzy
+#: ../plugin.py:317
+msgid "Can not pair with selected device!"
+msgstr "No es pot vincular amb aquest dispositiu!"
+
+#, fuzzy
+#: ../plugin.py:233
+msgid "Can't pair with selected device!"
+msgstr "No es pot vincular amb aquest dispositiu!"
+
+#: ../plugin.py:227 ../plugin.py:282
+msgid "Cancel"
+msgstr ""
+
+#: ../plugin.py:194
+msgid "Connect"
+msgstr "Connectar"
+
+#, fuzzy
+#: ../plugin.py:177 ../plugin.py:257
+msgid "Connected"
+msgstr "Connectar"
+
+#: ../plugin.py:331
+msgid "Connecting..."
+msgstr ""
+
+#: ../plugin.py:240 ../plugin.py:338
+msgid "Connection with:\n"
+msgstr "Connectat amb:\n"
+
+#: ../plugin.py:194 ../plugin.py:241
+msgid "Disconnect"
+msgstr "Desconnectar"
+
+#, fuzzy
+#: ../plugin.py:300
+msgid "Disconnect with:\n"
+msgstr "Connectat amb:\n"
+
+#, fuzzy
+#: ../plugin.py:353
+msgid "Disconnecting please wait..."
+msgstr "Connectat amb:\n"
+
+#: ../plugin.py:288
+msgid "Disconnecting..."
+msgstr ""
+
+#: ../plugin.py:107
+msgid "Exit"
+msgstr "Sortir"
+
+#, fuzzy
+#: ../plugin.py:177 ../plugin.py:257
+msgid "Not connected"
+msgstr "No s'ha connectat a cap dispositiu"
+
+#: ../plugin.py:112 ../plugin.py:186
+msgid "Not connected to any device"
+msgstr "No s'ha connectat a cap dispositiu"
+
+#: ../plugin.py:308
+msgid "Pairing..."
+msgstr ""
+
+#: ../plugin.py:321
+msgid "Please Enter Passkey: \n"
+msgstr ""
+
+#: ../plugin.py:390
+msgid "Please select scan mode."
+msgstr ""
+
+#, fuzzy
+#: ../plugin.py:110 ../plugin.py:201 ../plugin.py:285 ../plugin.py:336
+msgid "Scan"
+msgstr "(Re)escanejar"
+
+#: ../plugin.py:385
+msgid "Scan and setup Vu+ Bluetooth RCU"
+msgstr ""
+
+#: ../plugin.py:386
+msgid "Scan other bluetooth 3.0 device (A2DP, HID)"
+msgstr ""
+
+#: ../plugin.py:215 ../plugin.py:278
+msgid "Scanning for VUPLUS-BLE-RCU, press MENU/AUDIO for 5s..."
+msgstr ""
+
+#: ../plugin.py:217 ../plugin.py:280
+msgid "Scanning for devices..."
+msgstr "Cercant dispositius..."
+
+#: ../plugin.py:324
+msgid "Trusting..."
+msgstr ""
+
+#: ../plugin.py:360
+msgid "Trying to pair with:"
+msgstr "Intentant vincular amb:"

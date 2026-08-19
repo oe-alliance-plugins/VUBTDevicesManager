@@ -1,0 +1,75 @@
+#!/bin/sh
+
+default_asoundconf() {
+cat << EOF > /etc/asound.conf
+pcm.!default {
+    type plug
+    slave.pcm "hw:0"
+}
+
+ctl.mixer0 {
+    type hw
+    card 0
+}
+EOF
+}
+
+bluetooth_asoundconf() {
+cat << EOF >> /etc/asound.conf
+pcm.bluetooth {
+    type plug
+    slave.pcm {
+        type bluealsa
+        interface "hci0"
+        device "$1"
+        profile "a2dp"
+    }
+    hint {
+        show on
+        description "Bluetooth $2"
+    }
+}
+
+ctl.bluetooth {
+    type bluealsa
+}
+EOF
+}
+
+/usr/bin/killall -q aplay 2>/dev/null || true
+/usr/bin/killall -9 aplay 2>/dev/null || true
+sleep 1
+
+default_asoundconf
+
+if [ -n "$1" ]; then
+    bluetoothaddr="$@"
+
+    if ! bluetoothctl info "$bluetoothaddr" >/dev/null 2>&1; then
+        echo off > /proc/stb/audio/btaudio
+        exit 1
+    fi
+
+    bluetoothctl connect "$bluetoothaddr"
+
+    if ! bluetoothctl info "$bluetoothaddr" | grep -q "Audio Sink"; then
+        echo off > /proc/stb/audio/btaudio
+        exit 1
+    fi
+
+    bluetoothname="$(bluetoothctl info "$bluetoothaddr" | grep "Name" | cut -d ':' -f 2 | xargs)"
+
+    bluetooth_asoundconf "$bluetoothaddr" "$bluetoothname"
+
+    sleep 1
+    if ! bluetoothctl info "$bluetoothaddr" | grep -q "Connected: yes"; then
+        echo off > /proc/stb/audio/btaudio
+        exit 1
+    fi
+
+    echo on > /proc/stb/audio/btaudio
+    sleep 2
+    arecord -q -f dat -t raw -N | aplay -q -f dat -t raw -N -D bluealsa &
+fi
+
+exit 0

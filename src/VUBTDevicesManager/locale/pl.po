@@ -1,0 +1,134 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: BTDevicesManager\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-19 06:39+0200\n"
+"PO-Revision-Date: 2025-11-11 15:41+0000\n"
+"Last-Translator: pololoko111\n"
+"Language-Team: \n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.7\n"
+
+#: ../setup.xml
+msgid "Audio Connect"
+msgstr "Połączenie audio"
+
+#: ../plugin.py:93 ../plugin.py:406 ../plugin.py:458 ../setup.xml
+msgid "Bluetooth Setup"
+msgstr ""
+
+#: ../plugin.py:458
+msgid "BluetoothSetup"
+msgstr ""
+
+#, fuzzy
+#: ../plugin.py:329 ../plugin.py:344
+msgid "Can not connect with selected device!"
+msgstr "Nie można sparować z wybranym urządzeniem!"
+
+#, fuzzy
+#: ../plugin.py:317
+msgid "Can not pair with selected device!"
+msgstr "Nie można sparować z wybranym urządzeniem!"
+
+#, fuzzy
+#: ../plugin.py:233
+msgid "Can't pair with selected device!"
+msgstr "Nie można sparować z wybranym urządzeniem!"
+
+#: ../plugin.py:227 ../plugin.py:282
+msgid "Cancel"
+msgstr ""
+
+#: ../plugin.py:194
+msgid "Connect"
+msgstr "Połącz"
+
+#: ../plugin.py:177 ../plugin.py:257
+msgid "Connected"
+msgstr "Połączony"
+
+#: ../plugin.py:331
+msgid "Connecting..."
+msgstr ""
+
+#: ../plugin.py:240 ../plugin.py:338
+msgid "Connection with:\n"
+msgstr "Połączenie z:\n"
+
+#: ../plugin.py:194 ../plugin.py:241
+msgid "Disconnect"
+msgstr "Rozłącz"
+
+#: ../plugin.py:300
+msgid "Disconnect with:\n"
+msgstr "Rozłącz się z:\n"
+
+#: ../plugin.py:353
+msgid "Disconnecting please wait..."
+msgstr "Rozłączanie, proszę czekać..."
+
+#: ../plugin.py:288
+msgid "Disconnecting..."
+msgstr ""
+
+#: ../plugin.py:107
+msgid "Exit"
+msgstr "Wyjście"
+
+#: ../plugin.py:177 ../plugin.py:257
+msgid "Not connected"
+msgstr "Nie połączony"
+
+#: ../plugin.py:112 ../plugin.py:186
+msgid "Not connected to any device"
+msgstr "Nie połączono z żadnym urządzeniem"
+
+#: ../plugin.py:308
+msgid "Pairing..."
+msgstr ""
+
+#: ../plugin.py:321
+msgid "Please Enter Passkey: \n"
+msgstr "Proszę wprowadzić hasło: \n"
+
+#: ../plugin.py:390
+msgid "Please select scan mode."
+msgstr ""
+
+#: ../plugin.py:110 ../plugin.py:201 ../plugin.py:285 ../plugin.py:336
+msgid "Scan"
+msgstr "Skanuj"
+
+#: ../plugin.py:385
+msgid "Scan and setup Vu+ Bluetooth RCU"
+msgstr ""
+
+#: ../plugin.py:386
+msgid "Scan other bluetooth 3.0 device (A2DP, HID)"
+msgstr ""
+
+#: ../plugin.py:215 ../plugin.py:278
+msgid "Scanning for VUPLUS-BLE-RCU, press MENU/AUDIO for 5s..."
+msgstr ""
+
+#: ../plugin.py:217 ../plugin.py:280
+msgid "Scanning for devices..."
+msgstr "Skanowanie urządzeń..."
+
+#: ../plugin.py:324
+msgid "Trusting..."
+msgstr ""
+
+#: ../plugin.py:360
+msgid "Trying to pair with:"
+msgstr "Próba sparowania z:"
