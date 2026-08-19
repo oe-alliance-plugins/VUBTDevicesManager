@@ -162,16 +162,23 @@ class Bluetoothctl:
     def get_paired_devices(self):
         """Return a list of paired devices."""
         paired_devices = []
+
         try:
-            # BlueZ 5.78 uses "devices Paired"; BlueZ 5.50 used "paired-devices".
+            # BlueZ >= 5.65
             out = self.get_output("devices Paired")
-        except Exception as error:
-            print(error)
-        else:
-            for line in out:
-                device = self.parse_device_info(line)
-                if device:
-                    paired_devices.append(device)
+        except Exception:
+            try:
+                # BlueZ 5.50 / older versions
+                out = self.get_output("paired-devices")
+            except Exception as error:
+                print(error)
+                return paired_devices
+
+        for line in out:
+            device = self.parse_device_info(line)
+            if device:
+                paired_devices.append(device)
+
         return paired_devices
 
     def get_discoverable_devices(self):
