@@ -458,7 +458,8 @@ def sessionstart(session, reason, **kwargs):
 def Plugins(**kwargs):
 	if fileCheck("/sys/class/bluetooth/hci0"):
 		return [
-			PluginDescriptor(name=_("BluetoothSetup"), description=_("Bluetooth Setup"), where=[PluginDescriptor.WHERE_MENU], fnc=selSetup),
-			PluginDescriptor(where=PluginDescriptor.WHERE_SESSIONSTART, fnc=sessionstart)
+			PluginDescriptor(where=[PluginDescriptor.WHERE_SESSIONSTART], fnc=sessionstart),
+			PluginDescriptor(name=_("Bluetooth Devices Manager"), description=_("This is bt devices manager"), icon="plugin.png", where=PluginDescriptor.WHERE_PLUGINMENU, fnc=main)
 		]
-	return []
+	else:
+		return []
