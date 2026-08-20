@@ -197,6 +197,7 @@ class BluetoothDevicesManager(Screen):
 
 	def keyBlue(self):
 		if iBluetoothctl.isScanning:
+			self.refreshScanedTimer.stop()
 			iBluetoothctl.stop_scan()
 			self["key_blue"].setText(_("Scan"))
 			self.readDeviceList()
@@ -274,14 +275,16 @@ class BluetoothDevicesManager(Screen):
 		if iBluetoothctl.isScanning:
 			print("iBluetoothctl.isScanning = True")
 			if not devicelist:
-				if self.deviceFilter == "vurcusetup":
-					self.devicelist.append((_("Scanning for VUPLUS-BLE-RCU, press MENU/AUDIO for 5s..."), ""))
-				else:
-					self.devicelist.append((_("Scanning for devices..."), ""))
+				message = (_("Scanning for VUPLUS-BLE-RCU, press MENU/AUDIO for 5s..."), "") if self.deviceFilter == "vurcusetup" else (_("Scanning for devices..."), "")
+				placeholder = [message]
+				if self.devicelist != placeholder:
+					self.devicelist = placeholder
+					self["devicelist"].setList(self.devicelist)
 			self["key_yellow"].setText(" ")
 			self["key_blue"].setText(_("Cancel"))
 		else:
 			print("iBluetoothctl.isScanning = False")
+			self.refreshScanedTimer.stop()
 			self["key_blue"].setText(_("Scan"))
 
 	def _disconnect(self, mac_address, name):

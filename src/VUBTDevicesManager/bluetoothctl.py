@@ -33,6 +33,8 @@ from pexpect import EOF, TIMEOUT, spawn
 class Bluetoothctl:
     """A wrapper for the bluetoothctl utility."""
 
+    prompt = re.compile(r"\[[^\]\r\n]+\][#>]\s*(?:\x1b\[[0-9;]*m)?")
+
     def __init__(self):
         check_output("rfkill unblock bluetooth", shell=True)
         self.process = None
@@ -69,6 +71,12 @@ class Bluetoothctl:
             try:
                 self.process = spawn("bluetoothctl", encoding="utf-8", codec_errors="replace", echo=False)
                 self.process.expect("Agent registered", timeout=10)
+                # BlueZ 5.87 only emits its initial "[bluetoothctl]>" prompt
+                # after receiving input.  Consume it here so command output is
+                # not shifted by one request.  Older versions use "[bluetooth]#".
+                self.process.send("\n")
+                if self.process.expect([self.prompt, EOF, TIMEOUT], timeout=10):
+                    raise RuntimeError("bluetoothctl prompt not available")
                 isReady = True
                 print("bluetoothctl is ready.")
             except Exception as error:
@@ -81,7 +89,7 @@ class Bluetoothctl:
             return
         self.process.send(f"{command}\n")
         sleep(pause)
-        if self.process.expect(["#", EOF, TIMEOUT]):
+        if self.process.expect([self.prompt, EOF, TIMEOUT]):
             raise RuntimeError(f"bluetoothctl failed after {command}")
 
     def get_output(self, *args, **kwargs):
