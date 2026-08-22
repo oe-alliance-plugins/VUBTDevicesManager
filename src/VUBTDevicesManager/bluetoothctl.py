@@ -34,6 +34,7 @@ class Bluetoothctl:
     """A wrapper for the bluetoothctl utility."""
 
     prompt = re.compile(r"\[[^\]\r\n]+\][#>]\s*(?:\x1b\[[0-9;]*m)?")
+    ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
 
     def __init__(self):
         check_output("rfkill unblock bluetooth", shell=True)
@@ -129,6 +130,9 @@ class Bluetoothctl:
         device = {}
         block_list = ["[\x1b[0;", "removed"]
         if not any(keyword in info_string for keyword in block_list):
+            # BlueZ 5.87 wraps devices that advertise as non-discoverable in
+            # COLOR_BOLDGRAY, which would otherwise end up in the name.
+            info_string = self.ansi_escape.sub("", info_string)
             try:
                 device_position = info_string.index("Device")
             except ValueError:
@@ -227,8 +231,7 @@ class Bluetoothctl:
             result = self.process.expect(["Request confirmation", EOF])
             return result == 0
         if result in (2, 3):
-            ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
-            self.passkey = ansi_escape.sub("", str(self.process.buffer))
+            self.passkey = self.ansi_escape.sub("", str(self.process.buffer))
             return False
         print("Failed to pair.")
         return False
@@ -278,8 +281,9 @@ class Bluetoothctl:
         except Exception as error:
             print(error)
             return False
-        result = self.process.expect(["Failed to disconnect", "Successful disconnected", EOF])
-        return result == 1
+        # BlueZ renamed the message after 5.70; keep both spellings.
+        result = self.process.expect(["Failed to disconnect", "Disconnection successful", "Successful disconnected", EOF])
+        return result in (1, 2)
 
     def agent_noinputnooutput(self):
         """Start the NoInputNoOutput agent."""
