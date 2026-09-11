@@ -35,7 +35,7 @@ from Components.ServiceEventTracker import ServiceEventTracker
 from Plugins.Plugin import PluginDescriptor
 from Screens.Screen import Screen
 from Screens.Setup import Setup
-from Tools.Directories import SCOPE_CURRENT_PLUGIN, fileCheck, resolveFilename
+from Tools.Directories import SCOPE_CURRENT_PLUGIN, resolveFilename
 from . import _
 from .bluetoothctl import iBluetoothctl
 
@@ -64,7 +64,8 @@ def applyBTAudioState():
 	commandconnect = resolveFilename(SCOPE_CURRENT_PLUGIN, "Extensions/BTDevicesManager/BTAudioConnect")
 	audioaddress = config.btdevicesmanager.audioaddress.value
 	audioaddress = f" {audioaddress}" if audioaddress else ""
-	system(f"{commandconnect}{audioaddress}")
+	# Connection setup includes controller waits; never block session startup.
+	system(f"{commandconnect}{audioaddress} &")
 
 
 class BluetoothDevicesManagerSetup(Setup):
@@ -138,7 +139,8 @@ class BluetoothDevicesManager(Screen):
 		if self.controlerPath:
 			self.readDeviceList()
 
-		self.onShown.append(self.__onShow)
+		# Returning from the scan-mode dialog must not start a second client.
+		self.onFirstExecBegin.append(self.__onShow)
 
 	def __onShow(self):
 		iBluetoothctl._start_thread()
@@ -280,7 +282,8 @@ class BluetoothDevicesManager(Screen):
 				if self.devicelist != placeholder:
 					self.devicelist = placeholder
 					self["devicelist"].setList(self.devicelist)
-			self["key_yellow"].setText(" ")
+			# A discovered device can already be connected while scanning.
+			self.selectionChanged()
 			self["key_blue"].setText(_("Cancel"))
 		else:
 			print("iBluetoothctl.isScanning = False")
@@ -456,10 +459,8 @@ def sessionstart(session, reason, **kwargs):
 
 
 def Plugins(**kwargs):
-	if fileCheck("/sys/class/bluetooth/hci0"):
-		return [
-			PluginDescriptor(where=[PluginDescriptor.WHERE_SESSIONSTART], fnc=sessionstart),
-			PluginDescriptor(name=_("Bluetooth Devices Manager"), description=_("This is bt devices manager"), icon="plugin.png", where=PluginDescriptor.WHERE_PLUGINMENU, fnc=main)
-		]
-	else:
-		return []
+	# The controller may still be initializing when plugins are discovered.
+	return [
+		PluginDescriptor(where=[PluginDescriptor.WHERE_SESSIONSTART], fnc=sessionstart),
+		PluginDescriptor(name=_("Bluetooth Devices Manager"), description=_("This is bt devices manager"), icon="plugin.png", where=PluginDescriptor.WHERE_PLUGINMENU, fnc=main)
+	]

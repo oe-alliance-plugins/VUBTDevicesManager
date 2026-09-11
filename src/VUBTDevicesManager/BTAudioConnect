@@ -1,5 +1,65 @@
 #!/bin/sh
 
+PLAYBACK_PIDFILE=/var/run/aplay.pid
+CAPTURE_PIDFILE=/var/run/btaudio-arecord.pid
+STREAM_TOKENFILE=/var/run/btaudio-stream.id
+
+# Boot and GUI requests may overlap now that connection setup is asynchronous.
+exec 9>/var/run/btaudio-connect.lock
+flock -w 10 9 || exit 1
+
+log() {
+    logger -t BluetoothManager "$1"
+}
+
+pcm_process_running() {
+    case "$1" in
+        ''|*[!0-9]*|0|1) return 1 ;;
+    esac
+    [ -r "/proc/$1/cmdline" ] || return 1
+    tr '\000' '\n' < "/proc/$1/cmdline" | grep -Fxq -- "$2"
+}
+
+stop_pcm() {
+    pcm_pid=$(cat "$1" 2>/dev/null)
+    if pcm_process_running "$pcm_pid" "$1"; then
+        kill "$pcm_pid" 2>/dev/null
+        for stop_wait in 1 2 3; do
+            pcm_process_running "$pcm_pid" "$1" || break
+            sleep 1
+        done
+        if pcm_process_running "$pcm_pid" "$1"; then
+            kill -KILL "$pcm_pid" 2>/dev/null
+        fi
+    fi
+    rm -f "$1"
+}
+
+capture_audio() {
+    # The BCM capture driver can return EFAULT before TV audio is ready.
+    # Keep the playback pipe open during bounded capture-start recovery.
+    capture_attempt=0
+    while :; do
+        [ "$(cat "$STREAM_TOKENFILE" 2>/dev/null)" = "$1" ] || return 0
+        arecord -q -f dat -t raw -N --process-id-file "$CAPTURE_PIDFILE"
+        capture_status=$?
+        [ "$capture_status" -eq 1 ] || return "$capture_status"
+        capture_attempt=$((capture_attempt+1))
+        if [ "$capture_attempt" -ge 10 ]; then
+            log "Audio capture failed repeatedly; stopping the stream"
+            return 1
+        fi
+        playback_pid=$(cat "$PLAYBACK_PIDFILE" 2>/dev/null)
+        pcm_process_running "$playback_pid" "$PLAYBACK_PIDFILE" || return 0
+        [ "$(cat /proc/stb/audio/btaudio 2>/dev/null)" = on ] || return 0
+        log "Audio capture not ready; retry $capture_attempt/9"
+        sleep 1
+        [ "$(cat "$STREAM_TOKENFILE" 2>/dev/null)" = "$1" ] || return 0
+        pcm_process_running "$playback_pid" "$PLAYBACK_PIDFILE" || return 0
+        [ "$(cat /proc/stb/audio/btaudio 2>/dev/null)" = on ] || return 0
+    done
+}
+
 default_asoundconf() {
 cat << EOF > /etc/asound.conf
 pcm.!default {
@@ -36,21 +96,25 @@ ctl.bluetooth {
 EOF
 }
 
-/usr/bin/killall -q aplay 2>/dev/null || true
-/usr/bin/killall -9 aplay 2>/dev/null || true
+rm -f "$STREAM_TOKENFILE"
+stop_pcm "$PLAYBACK_PIDFILE"
+stop_pcm "$CAPTURE_PIDFILE"
 sleep 1
 
 default_asoundconf
 
 if [ -n "$1" ]; then
-    bluetoothaddr="$@"
+    bluetoothaddr="$1"
 
     if ! bluetoothctl info "$bluetoothaddr" >/dev/null 2>&1; then
         echo off > /proc/stb/audio/btaudio
         exit 1
     fi
 
-    bluetoothctl connect "$bluetoothaddr"
+    if ! timeout 20 bluetoothctl connect "$bluetoothaddr"; then
+        echo off > /proc/stb/audio/btaudio
+        exit 1
+    fi
 
     if ! bluetoothctl info "$bluetoothaddr" | grep -q "Audio Sink"; then
         echo off > /proc/stb/audio/btaudio
@@ -69,7 +133,8 @@ if [ -n "$1" ]; then
 
     echo on > /proc/stb/audio/btaudio
     sleep 2
-    arecord -q -f dat -t raw -N | aplay -q -f dat -t raw -N -D bluealsa &
+    printf '%s\n' "$$" > "$STREAM_TOKENFILE"
+    capture_audio "$$" 9>&- | aplay -q -f dat -t raw -N -D bluealsa --process-id-file "$PLAYBACK_PIDFILE" 9>&- &
 fi
 
 exit 0

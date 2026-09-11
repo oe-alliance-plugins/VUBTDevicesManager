@@ -21,9 +21,8 @@
 # You should have received a copy of the GNU General Public License
 # along with ReachView. If not, see <http://www.gnu.org/licenses/>.
 
-from os import kill
 import re
-from subprocess import CalledProcessError, check_output
+from subprocess import check_output
 import threading
 from time import sleep
 
@@ -43,34 +42,41 @@ class Bluetoothctl:
         self.max_attempts = 5
         self.deviceFilter = None
         self.passkey = None
+        self.start_thread = None
+        self.stop_requested = threading.Event()
 
     def _start_thread(self):
-        thread = threading.Thread(target=self._start_bluetoothctl, daemon=True)
-        thread.start()
+        if self.start_thread and self.start_thread.is_alive():
+            return
+        if self.process and self.process.isalive():
+            return
+        self.stop_requested.clear()
+        self.start_thread = threading.Thread(target=self._start_bluetoothctl, daemon=True)
+        self.start_thread.start()
 
     def _stop_thread(self):
+        self.stop_requested.set()
         self.kill_existing_bluetoothctl()
-        self.process = None
 
     def kill_existing_bluetoothctl(self):
-        try:
-            output = check_output("pgrep bluetoothctl", shell=True, text=True).strip()
-            for pid in output.splitlines():
-                print(f"Killing leftover bluetoothctl process {pid}")
-                kill(int(pid), 9)
-        except CalledProcessError:
-            # pgrep returns non-zero if no process was found, which is fine.
-            pass
+        # Never kill the independent client used by BTAudioConnect.
+        process = self.process
+        self.process = None
+        if process:
+            process.close(force=True)
 
     def _start_bluetoothctl(self):
         attempts = 0
         isReady = False
-        while not isReady and attempts < self.max_attempts:
+        while not isReady and attempts < self.max_attempts and not self.stop_requested.is_set():
             print("Trying to start bluetoothctl...")
             attempts += 1
             self.process = None
             try:
                 self.process = spawn("bluetoothctl", encoding="utf-8", codec_errors="replace", echo=False)
+                if self.stop_requested.is_set():
+                    self.kill_existing_bluetoothctl()
+                    return
                 self.process.expect("Agent registered", timeout=10)
                 # BlueZ 5.87 only emits its initial "[bluetoothctl]>" prompt
                 # after receiving input.  Consume it here so command output is
@@ -83,7 +89,7 @@ class Bluetoothctl:
             except Exception as error:
                 print(f"bluetoothctl start failed: {error}")
                 self.kill_existing_bluetoothctl()
-                sleep(2)
+                self.stop_requested.wait(2)
 
     def send(self, command, pause=0):
         if not self.process:
